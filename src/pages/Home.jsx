@@ -26,7 +26,7 @@ import {
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination, EffectFade } from "swiper/modules";
 import "swiper/css/effect-fade";
-import { Helmet } from "react-helmet-async";
+import { Helmet } from "react-helmet";
 import { useReveal } from "../hooks/useReveal";
 
 const services = [

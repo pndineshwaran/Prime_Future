@@ -27,6 +27,7 @@ import Sitemap from './pages/Sitemap'
  * Small wrapper that applies a page transition animation to route content
  * Features: fade + slide up on enter, fade + slide up on exit
  */
+console.log("App loaded");
 const PageWrapper = ({ children }) => (
   <Motion.div
     // Fade in and slide up when route mounts

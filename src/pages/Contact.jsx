@@ -7,7 +7,7 @@
 
 import { useState } from 'react'
 import { motion as Motion } from 'framer-motion'
-import { Helmet } from 'react-helmet-async'
+import { Helmet } from "react-helmet"
 import { FiMail, FiPhone, FiMapPin, FiLinkedin, FiInstagram, FiFacebook, FiClock } from 'react-icons/fi'
 import { useReveal } from '../hooks/useReveal'
 

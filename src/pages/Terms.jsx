@@ -4,7 +4,7 @@
  * Used on: /terms
  */
 
-import { Helmet } from 'react-helmet-async'
+import { Helmet } from "react-helmet"
 
 /**
  * Terms

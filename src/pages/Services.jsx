@@ -7,7 +7,7 @@
 
 import { useState } from 'react'
 import { motion as Motion, AnimatePresence } from 'framer-motion'
-import { Helmet } from 'react-helmet-async'
+import { Helmet } from "react-helmet"
 import {
   FiUserCheck,
   FiBookOpen,

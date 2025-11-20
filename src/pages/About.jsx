@@ -7,7 +7,7 @@
 
 import { motion as Motion } from 'framer-motion'
 import { useReveal } from '../hooks/useReveal'
-import { Helmet } from 'react-helmet-async'
+import { Helmet } from "react-helmet"
 import { FiTarget, FiEye, FiShield, FiUserCheck, FiAward, FiGlobe } from 'react-icons/fi'
 
 const values = [
