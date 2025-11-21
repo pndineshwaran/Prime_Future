@@ -6,6 +6,8 @@
  */
 
 import { motion as Motion } from 'framer-motion'
+import { useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useReveal } from '../hooks/useReveal'
 import { Helmet } from "react-helmet"
 import { FiTarget, FiEye, FiShield, FiUserCheck, FiAward, FiGlobe } from 'react-icons/fi'
@@ -36,6 +38,41 @@ const About = () => {
   const [leadershipRef, leadershipControls] = useReveal()
   // valuesRef - company values grid
   const [valuesRef, valuesControls] = useReveal()
+
+  const location = useLocation()
+
+  useEffect(() => {
+    if (location.state?.scrollTo) {
+      const target = document.getElementById(location.state.scrollTo)
+      if (target) {
+        // Clear the navigation state immediately so repeat navigation won't retrigger
+        window.history.replaceState({}, '', window.location.pathname)
+
+        // Smooth animated scroll with easing and header offset
+        const headerOffset = 96 // adjust this value to match your fixed header height
+        const startY = window.pageYOffset
+        const targetY = target.getBoundingClientRect().top + window.pageYOffset - headerOffset
+        const distance = targetY - startY
+        const duration = 400
+        let startTime = null
+
+        const easeInOutCubic = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2)
+
+        const step = (timestamp) => {
+          if (!startTime) startTime = timestamp
+          const elapsed = timestamp - startTime
+          const progress = Math.min(elapsed / duration, 1)
+          const eased = easeInOutCubic(progress)
+          window.scrollTo(0, startY + distance * eased)
+          if (progress < 1) {
+            window.requestAnimationFrame(step)
+          }
+        }
+
+        window.requestAnimationFrame(step)
+      }
+    }
+  }, [location])
 
   return (
     <div className="bg-white text-primary">
@@ -124,6 +161,7 @@ const About = () => {
 
       {/* ===== SECTION: Leadership Team ===== */}
       <Motion.section
+        id="leadership"
         ref={leadershipRef}
         initial={{ opacity: 0, y: 50 }}
         animate={leadershipControls}
