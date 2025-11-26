@@ -5,7 +5,7 @@
  * Used on: / (Home route)
  */
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion as Motion, useScroll, useTransform } from "framer-motion";
 import CountUp from "react-countup";
@@ -75,20 +75,22 @@ const services = [
 
 const testimonials = [
   {
-    name: "Ananya Patel",
-    quote: "PrimeFuture made my dream of studying in the UK a reality!",
+    name: "Soundarya Shanmugam",
+    quote:
+      "I got into a top university in the UK with a scholarship! Thanks to Primefuture Education’s support. Their SOP editing and counseling was top-notch.",
   },
   {
-    name: "Rahul Verma",
-    quote: "Excellent guidance throughout the entire process.",
+    name: "Mounithan K",
+    quote:
+      "Proper way of guidance and full support to join in top universities 💯♥️",
   },
   {
     name: "Shruti Menon",
     quote: "Professional, reliable, and genuinely caring team.",
   },
   {
-    name: "Jonathan Lee",
-    quote: "Their mentorship and support were invaluable from day one.",
+    name: "Suganthi Sivakumar",
+    quote: "It's a best platform to go abroad and useful",
   },
 ];
 
@@ -103,7 +105,21 @@ const countries = [
   { src: "/image/flage/008.png", caption: "New Zealand" },
   { src: "/image/flage/009.png", caption: "Japan" },
   { src: "/image/flage/010.png", caption: "France" },
-]
+];
+
+const videoReels = [
+  {
+    src: "/video/video1.mp4",
+    poster: "/image/video-poster1.jpg",
+    caption: "Student Reel 1",
+  },
+  {
+    src: "/video/video2.mp4",
+    poster: "/image/video-poster2.jpg",
+    caption: "Student Reel 2",
+  },
+  //{ src: "/video/reel3.mp4", poster: "/image/video-poster3.jpg", caption: "Student Reel 3" },
+];
 
 const leaderImages = {
   "Sathesh Kumar": "/image/sathesh-kumar.jpg",
@@ -130,6 +146,7 @@ const Home = () => {
   // [testimonialsRef] - ref for testimonials carousel
   const [testimonialsRef, testimonialsControls] = useReveal();
   // [finalCtaRef] - ref for the final call-to-action section
+  const [videoRef, videoControls] = useReveal();
   const [finalCtaRef, finalCtaControls] = useReveal();
 
   // Metrics section visibility (for CountUp) - only animate once when in view
@@ -162,6 +179,72 @@ const Home = () => {
       navigate("/contact");
     }
   };
+
+  // Refs for reel videos so we can play/pause the active one when the Swiper slide changes
+  const videoRefs = useRef([]);
+  const endedHandlers = useRef([]);
+  const reelSwiperRef = useRef(null);
+
+  const playActiveReel = (swiper) => {
+    // keep a reference to the swiper instance for advancing when video ends
+    if (swiper) reelSwiperRef.current = swiper;
+    const activeIndex =
+      typeof swiper?.realIndex === "number"
+        ? swiper.realIndex
+        : swiper?.activeIndex || 0;
+
+    videoRefs.current.forEach((vidEl, idx) => {
+      if (!vidEl) return;
+      // detach any previous ended handler for this element
+      const prevHandler = endedHandlers.current[idx];
+      if (prevHandler) {
+        try {
+          vidEl.removeEventListener("ended", prevHandler);
+        } catch (e) {}
+        endedHandlers.current[idx] = null;
+      }
+
+      try {
+        if (idx === activeIndex) {
+          vidEl.currentTime = 0;
+          vidEl.muted = true; // ensure muted so autoplay works across browsers
+          // play and attach ended handler to advance the swiper when video completes
+          vidEl.play().catch(() => {});
+          const handler = () => {
+            try {
+              if (reelSwiperRef.current) reelSwiperRef.current.slideNext();
+            } catch (e) {}
+          };
+          endedHandlers.current[idx] = handler;
+          vidEl.addEventListener("ended", handler);
+        } else {
+          vidEl.pause();
+          vidEl.currentTime = 0;
+        }
+      } catch (e) {
+        // ignore play errors
+      }
+    });
+  };
+
+  // cleanup on unmount: remove event listeners and pause media
+  useEffect(() => {
+    return () => {
+      videoRefs.current.forEach((vidEl, idx) => {
+        if (!vidEl) return;
+        const handler = endedHandlers.current[idx];
+        if (handler) {
+          try {
+            vidEl.removeEventListener("ended", handler);
+          } catch (e) {}
+          endedHandlers.current[idx] = null;
+        }
+        try {
+          vidEl.pause();
+        } catch (e) {}
+      });
+    };
+  }, []);
 
   return (
     <>
@@ -557,7 +640,7 @@ const Home = () => {
           <div className="mx-auto max-w-6xl">
             <div className="text-center">
               <p className="text-sm font-semibold uppercase tracking-[0.4em] text-primary/70">
-                Testimonials
+                Reviews
               </p>
               <h2 className="mt-4 text-4xl font-semibold text-primary">
                 What Our Students Say
@@ -589,6 +672,80 @@ const Home = () => {
                   </SwiperSlide>
                 ))}
               </Swiper>
+            </div>
+          </div>
+        </Motion.section>
+
+        {/* ===== SECTION 7.5: Video Review ===== */}
+
+        <Motion.section
+          id="video-review"
+          ref={videoRef}
+          initial={{ opacity: 0, y: 40 }}
+          animate={videoControls}
+          className="bg-white px-6 py-20"
+        >
+          <div className="mx-auto max-w-6xl">
+            <div className="mt-12 grid gap-8 md:grid-cols-2 items-start">
+              <div className="flex justify-center">
+                <Swiper
+                  modules={[Pagination]}
+                  spaceBetween={20}
+                  slidesPerView={1}
+                  loop={true}
+                  pagination={{ clickable: true }}
+                  speed={700}
+                  onSwiper={(s) => playActiveReel(s)}
+                  onSlideChange={(s) => playActiveReel(s)}
+                  className="w-full max-w-[420px]"
+                >
+                  {videoReels.map((vid, idx) => (
+                    <SwiperSlide key={vid.src}>
+                      <article className="rounded-3xl overflow-hidden bg-primary/5 shadow-elevation flex justify-center">
+                        <video
+                          ref={(el) => (videoRefs.current[idx] = el)}
+                          playsInline
+                          muted
+                          controls
+                          className="w-full aspect-[9/16] bg-black"
+                          poster={vid.poster}
+                        >
+                          <source src={vid.src} type="video/mp4" />
+                          Your browser does not support the video tag.
+                        </video>
+                      </article>
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
+              </div>
+              <div className="mt-24 md:mt-48">
+                <div className="text-center">
+                  <p className="text-sm font-semibold uppercase tracking-[0.4em] text-primary/70">
+                    Video Review
+                  </p>
+                  <h2 className="mt-4 mb-6 text-4xl font-semibold text-primary">
+                    Student Video Testimonials
+                  </h2>
+                </div>
+                <p className="text-primary/80">
+                  Watch our students share their experiences and outcomes after
+                  working with PrimeFuture Education. These candid video
+                  testimonials highlight support, admissions success, and
+                  scholarship wins.
+                </p>
+                <ul className="mt-6 space-y-3 text-primary/80 list-inside list-disc">
+                  <li>Personalised mentorship and SOP guidance</li>
+                  <li>Interview preparation and scholarship support</li>
+                  <li>Visa documentation and pre-departure assistance</li>
+                </ul>
+                <button
+                  type="button"
+                  onClick={() => navigate("/contact")}
+                  className="mt-6 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white"
+                >
+                  Talk to an advisor
+                </button>
+              </div>
             </div>
           </div>
         </Motion.section>
